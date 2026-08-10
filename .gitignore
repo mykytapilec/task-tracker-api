@@ -3,3 +3,9 @@ dist/
 .env
 .DS_Store
 /src/generated/prisma
+
+# docker
+*.log
+
+# prisma
+prisma/migrations/
