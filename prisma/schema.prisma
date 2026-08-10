@@ -7,24 +7,15 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String?
-
-  boards    Board[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
 }
 
 model Board {
   id        String   @id @default(uuid())
   title     String
-
-  ownerId   String
-  owner     User     @relation(fields: [ownerId], references: [id])
 
   columns   Column[]
 
@@ -47,16 +38,15 @@ model Column {
 }
 
 model Task {
-  id          String   @id @default(uuid())
+  id          String       @id @default(uuid())
   title       String
   description String?
-
   position    Int
-  priority    String   @default("medium")
-  status      String
+
+  priority    TaskPriority @default(MEDIUM)
 
   columnId    String
-  column      Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  column      Column       @relation(fields: [columnId], references: [id], onDelete: Cascade)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
