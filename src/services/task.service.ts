@@ -71,10 +71,20 @@ export const taskService = {
   },
 
   async update(id: string, userId: string, data: UpdateTaskInput) {
-    return prisma.task.updateMany({
+    const task = await prisma.task.findFirst({
       where: {
         id,
         userId,
+      },
+    });
+
+    if (!task) {
+      return null;
+    }
+
+    return prisma.task.update({
+      where: {
+        id,
       },
       data: {
         title: data.title,
@@ -83,15 +93,30 @@ export const taskService = {
           columnId: data.columnId,
         }),
       },
+      include: {
+        column: true,
+      },
     });
   },
 
   async remove(id: string, userId: string) {
-    return prisma.task.deleteMany({
+    const task = await prisma.task.findFirst({
       where: {
         id,
         userId,
       },
     });
+
+    if (!task) {
+      return false;
+    }
+
+    await prisma.task.delete({
+      where: {
+        id,
+      },
+    });
+
+    return true;
   },
 };
