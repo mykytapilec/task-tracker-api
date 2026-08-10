@@ -1,12 +1,15 @@
-import type { ErrorRequestHandler } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
-export const errorMiddleware: ErrorRequestHandler = (err, _req, res, next) => {
-  if (!err) {
-    next();
-    return;
-  }
+export const errorMiddleware = (
+  error: Error,
+  _req: Request,
+  res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _next: NextFunction,
+) => {
+  console.error(error);
 
-  res.status(500).json({
-    message: err.message ?? 'Internal server error',
+  res.status(400).json({
+    message: error.message || 'Something went wrong',
   });
 };
