@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
 import { taskService } from '../services/task.service.js';
 
-export const getTasks = async (_req: Request, res: Response) => {
-  const tasks = await taskService.getAll();
+export const getTasks = async (req: Request, res: Response) => {
+  const tasks = await taskService.getAll(req.user.id);
 
   res.json(tasks);
 };
@@ -16,7 +16,7 @@ export const getTaskById = async (req: Request, res: Response) => {
     });
   }
 
-  const task = await taskService.getById(id);
+  const task = await taskService.getById(id, req.user.id);
 
   if (!task) {
     return res.status(404).json({
@@ -28,12 +28,6 @@ export const getTaskById = async (req: Request, res: Response) => {
 };
 
 export const createTask = async (req: Request, res: Response) => {
-  if (!req.user) {
-    return res.status(401).json({
-      message: 'Authentication required',
-    });
-  }
-
   const task = await taskService.create({
     ...req.body,
     userId: req.user.id,
@@ -51,7 +45,7 @@ export const updateTask = async (req: Request, res: Response) => {
     });
   }
 
-  const task = await taskService.update(id, req.body);
+  const task = await taskService.update(id, req.user.id, req.body);
 
   res.json(task);
 };
@@ -65,7 +59,7 @@ export const deleteTask = async (req: Request, res: Response) => {
     });
   }
 
-  await taskService.remove(id);
+  await taskService.remove(id, req.user.id);
 
   res.status(204).send();
 };
