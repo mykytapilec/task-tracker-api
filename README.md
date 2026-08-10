@@ -18,7 +18,7 @@ The API handles:
 The frontend client is available here:
 
 Client application repository:
-`CLIENT_GITHUB_REPOSITORY_URL`
+(https://github.com/mykytapilec/task-tracker)
 
 ## Tech Stack
 
