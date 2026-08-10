@@ -4,6 +4,7 @@ interface CreateTaskInput {
   title: string;
   description?: string;
   columnId: string;
+  userId: string;
 }
 
 interface UpdateTaskInput {
@@ -17,6 +18,7 @@ export const taskService = {
     return prisma.task.findMany({
       include: {
         column: true,
+        user: true,
       },
     });
   },
@@ -28,6 +30,7 @@ export const taskService = {
       },
       include: {
         column: true,
+        user: true,
       },
     });
   },
@@ -52,9 +55,15 @@ export const taskService = {
             id: data.columnId,
           },
         },
+        user: {
+          connect: {
+            id: data.userId,
+          },
+        },
       },
       include: {
         column: true,
+        user: true,
       },
     });
   },
@@ -77,6 +86,7 @@ export const taskService = {
       },
       include: {
         column: true,
+        user: true,
       },
     });
   },
