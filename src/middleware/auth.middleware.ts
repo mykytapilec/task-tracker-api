@@ -1,9 +1,31 @@
-import type { NextFunction, Request, Response } from 'express';
+import type { Response, NextFunction } from 'express';
+import type { AuthenticatedRequest } from '../types/express.js';
+import { verifyToken } from '../utils/jwt.js';
 
 export const authMiddleware = (
-  _req: Request,
-  _res: Response,
+  req: AuthenticatedRequest,
+  res: Response,
   next: NextFunction,
 ) => {
-  next();
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({
+      message: 'Unauthorized',
+    });
+  }
+
+  try {
+    const payload = verifyToken(token);
+
+    req.user = {
+      id: payload.userId,
+    };
+
+    next();
+  } catch {
+    return res.status(401).json({
+      message: 'Invalid token',
+    });
+  }
 };

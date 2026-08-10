@@ -1,9 +1,17 @@
-import type { User } from '../generated/prisma/index.js';
+import type { Request } from 'express';
+
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+  };
+}
 
 declare global {
   namespace Express {
     interface Request {
-      user?: Pick<User, 'id'>;
+      user: {
+        id: string;
+      };
     }
   }
 }

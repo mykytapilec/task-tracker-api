@@ -14,23 +14,25 @@ interface UpdateTaskInput {
 }
 
 export const taskService = {
-  async getAll() {
+  async getAll(userId: string) {
     return prisma.task.findMany({
+      where: {
+        userId,
+      },
       include: {
         column: true,
-        user: true,
       },
     });
   },
 
-  async getById(id: string) {
-    return prisma.task.findUnique({
+  async getById(id: string, userId: string) {
+    return prisma.task.findFirst({
       where: {
         id,
+        userId,
       },
       include: {
         column: true,
-        user: true,
       },
     });
   },
@@ -39,6 +41,7 @@ export const taskService = {
     const lastTask = await prisma.task.findFirst({
       where: {
         columnId: data.columnId,
+        userId: data.userId,
       },
       orderBy: {
         position: 'desc',
@@ -50,51 +53,44 @@ export const taskService = {
         title: data.title,
         description: data.description,
         position: lastTask ? lastTask.position + 1 : 0,
-        column: {
-          connect: {
-            id: data.columnId,
-          },
-        },
         user: {
           connect: {
             id: data.userId,
           },
         },
+        column: {
+          connect: {
+            id: data.columnId,
+          },
+        },
       },
       include: {
         column: true,
-        user: true,
       },
     });
   },
 
-  async update(id: string, data: UpdateTaskInput) {
-    return prisma.task.update({
+  async update(id: string, userId: string, data: UpdateTaskInput) {
+    return prisma.task.updateMany({
       where: {
         id,
+        userId,
       },
       data: {
         title: data.title,
         description: data.description,
         ...(data.columnId && {
-          column: {
-            connect: {
-              id: data.columnId,
-            },
-          },
+          columnId: data.columnId,
         }),
-      },
-      include: {
-        column: true,
-        user: true,
       },
     });
   },
 
-  async remove(id: string) {
-    return prisma.task.delete({
+  async remove(id: string, userId: string) {
+    return prisma.task.deleteMany({
       where: {
         id,
+        userId,
       },
     });
   },
