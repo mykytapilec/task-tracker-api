@@ -13,6 +13,17 @@ enum TaskPriority {
   HIGH
 }
 
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+
+  tasks        Task[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 model Board {
   id        String   @id @default(uuid())
   title     String
@@ -47,6 +58,9 @@ model Task {
 
   columnId    String
   column      Column       @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

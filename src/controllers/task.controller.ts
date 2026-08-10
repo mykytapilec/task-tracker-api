@@ -28,7 +28,16 @@ export const getTaskById = async (req: Request, res: Response) => {
 };
 
 export const createTask = async (req: Request, res: Response) => {
-  const task = await taskService.create(req.body);
+  if (!req.user) {
+    return res.status(401).json({
+      message: 'Authentication required',
+    });
+  }
+
+  const task = await taskService.create({
+    ...req.body,
+    userId: req.user.id,
+  });
 
   res.status(201).json(task);
 };
