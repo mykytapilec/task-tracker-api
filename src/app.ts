@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express from 'express';
 import authRoutes from './routes/auth.routes.js';
 import healthRoutes from './routes/health.routes.js';
@@ -5,6 +6,12 @@ import taskRoutes from './routes/task.routes.js';
 import { errorMiddleware } from './middleware/error.middleware.js';
 
 export const app = express();
+
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+  }),
+);
 
 app.use(express.json());
 
