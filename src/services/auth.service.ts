@@ -25,15 +25,42 @@ export const authService = {
 
     const passwordHash = await hashPassword(data.password);
 
-    return prisma.user.create({
-      data: {
-        email: data.email,
-        passwordHash,
-      },
-      select: {
-        id: true,
-        email: true,
-      },
+    return prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email: data.email,
+          passwordHash,
+        },
+        select: {
+          id: true,
+          email: true,
+        },
+      });
+
+      await tx.board.create({
+        data: {
+          title: 'Task Tracker Board',
+          userId: user.id,
+          columns: {
+            create: [
+              {
+                title: 'To Do',
+                position: 0,
+              },
+              {
+                title: 'In Progress',
+                position: 1,
+              },
+              {
+                title: 'Completed',
+                position: 2,
+              },
+            ],
+          },
+        },
+      });
+
+      return user;
     });
   },
 
