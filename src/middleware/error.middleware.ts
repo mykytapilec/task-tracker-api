@@ -1,15 +1,15 @@
 import type { NextFunction, Request, Response } from 'express';
 
-export const errorMiddleware = (
+export function errorMiddleware(
   error: Error,
-  _req: Request,
-  res: Response,
+  _request: Request,
+  response: Response,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction,
-) => {
+) {
   console.error(error);
 
-  res.status(400).json({
-    message: error.message || 'Something went wrong',
+  response.status(400).json({
+    message: error.message || 'Internal server error',
   });
-};
+}
