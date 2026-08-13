@@ -24,8 +24,6 @@ export const reorderTaskSchema = z.object({
   columnId: z.string().uuid('Invalid column id'),
 
   position: z.number().int().min(0, 'Position must be at least 0'),
-
-  priority: z.number().int().min(1, 'Priority must be at least 1'),
 });
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
