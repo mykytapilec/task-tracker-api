@@ -7,12 +7,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum TaskPriority {
-  LOW
-  MEDIUM
-  HIGH
-}
-
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -53,18 +47,17 @@ model Column {
 }
 
 model Task {
-  id          String       @id @default(uuid())
+  id          String   @id @default(uuid())
   title       String
   description String?
   position    Int
-
-  priority    TaskPriority @default(MEDIUM)
+  priority    Int      @default(2)
 
   columnId    String
-  column      Column       @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  column      Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
 
   userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

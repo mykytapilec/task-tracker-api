@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 import { taskService } from '../services/task.service.js';
 import {
   createTaskSchema,
+  reorderTaskSchema,
   updateTaskSchema,
 } from '../validators/task.validator.js';
 
@@ -71,6 +72,39 @@ export const updateTask = async (req: Request, res: Response) => {
     if (!task) {
       return res.status(404).json({
         message: 'Task not found',
+      });
+    }
+
+    res.json(task);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        message: 'Validation error',
+        errors: error.issues,
+      });
+    }
+
+    throw error;
+  }
+};
+
+export const reorderTask = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!id || Array.isArray(id)) {
+    return res.status(400).json({
+      message: 'Invalid task id',
+    });
+  }
+
+  try {
+    const data = reorderTaskSchema.parse(req.body);
+
+    const task = await taskService.reorder(id, req.user.id, data);
+
+    if (!task) {
+      return res.status(404).json({
+        message: 'Task or column not found',
       });
     }
 
