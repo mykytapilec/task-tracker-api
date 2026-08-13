@@ -6,6 +6,8 @@ export const createTaskSchema = z.object({
   description: z.string().trim().optional(),
 
   columnId: z.string().uuid('Invalid column id'),
+
+  priority: z.number().int().min(1, 'Priority must be at least 1').optional(),
 });
 
 export const updateTaskSchema = z.object({
@@ -14,8 +16,20 @@ export const updateTaskSchema = z.object({
   description: z.string().trim().optional(),
 
   columnId: z.string().uuid('Invalid column id').optional(),
+
+  priority: z.number().int().min(1, 'Priority must be at least 1').optional(),
+});
+
+export const reorderTaskSchema = z.object({
+  columnId: z.string().uuid('Invalid column id'),
+
+  position: z.number().int().min(0, 'Position must be at least 0'),
+
+  priority: z.number().int().min(1, 'Priority must be at least 1'),
 });
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
+
+export type ReorderTaskInput = z.infer<typeof reorderTaskSchema>;
