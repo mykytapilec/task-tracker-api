@@ -5,6 +5,7 @@ interface CreateTaskInput {
   description?: string;
   columnId: string;
   priority?: number;
+  parentTaskId?: string | null;
   userId: string;
 }
 
@@ -13,6 +14,7 @@ interface UpdateTaskInput {
   description?: string;
   columnId?: string;
   priority?: number;
+  parentTaskId?: string | null;
 }
 
 interface ReorderTaskInput {
@@ -39,6 +41,11 @@ export const taskService = {
       ],
       include: {
         column: true,
+        subtasks: {
+          orderBy: {
+            position: 'asc',
+          },
+        },
       },
     });
   },
@@ -51,11 +58,29 @@ export const taskService = {
       },
       include: {
         column: true,
+        subtasks: {
+          orderBy: {
+            position: 'asc',
+          },
+        },
       },
     });
   },
 
   async create(data: CreateTaskInput) {
+    if (data.parentTaskId) {
+      const parentTask = await prisma.task.findFirst({
+        where: {
+          id: data.parentTaskId,
+          userId: data.userId,
+        },
+      });
+
+      if (!parentTask) {
+        throw new Error('Parent task not found');
+      }
+    }
+
     const lastTask = await prisma.task.findFirst({
       where: {
         columnId: data.columnId,
@@ -72,16 +97,9 @@ export const taskService = {
         description: data.description,
         position: lastTask ? lastTask.position + 1 : 0,
         priority: data.priority ?? 2,
-        user: {
-          connect: {
-            id: data.userId,
-          },
-        },
-        column: {
-          connect: {
-            id: data.columnId,
-          },
-        },
+        parentTaskId: data.parentTaskId ?? null,
+        userId: data.userId,
+        columnId: data.columnId,
       },
       include: {
         column: true,
@@ -101,6 +119,23 @@ export const taskService = {
       return null;
     }
 
+    if (data.parentTaskId) {
+      if (data.parentTaskId === id) {
+        throw new Error('Task cannot be its own parent');
+      }
+
+      const parentTask = await prisma.task.findFirst({
+        where: {
+          id: data.parentTaskId,
+          userId,
+        },
+      });
+
+      if (!parentTask) {
+        throw new Error('Parent task not found');
+      }
+    }
+
     return prisma.task.update({
       where: {
         id,
@@ -112,9 +147,13 @@ export const taskService = {
         ...(data.columnId && {
           columnId: data.columnId,
         }),
+        ...(data.parentTaskId !== undefined && {
+          parentTaskId: data.parentTaskId,
+        }),
       },
       include: {
         column: true,
+        subtasks: true,
       },
     });
   },
@@ -182,6 +221,7 @@ export const taskService = {
       },
       include: {
         column: true,
+        subtasks: true,
       },
     });
   },

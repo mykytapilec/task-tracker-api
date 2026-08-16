@@ -8,57 +8,61 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
+  id           String @id @default(uuid())
+  email        String @unique
   passwordHash String
 
-  board        Board?
-  tasks        Task[]
+  board Board?
+  tasks Task[]
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Board {
-  id        String   @id @default(uuid())
-  title     String
+  id    String @id @default(uuid())
+  title String
 
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  columns   Column[]
+  columns Column[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Column {
-  id        String   @id @default(uuid())
-  title     String
-  position  Int
+  id       String @id @default(uuid())
+  title    String
+  position Int
 
-  boardId   String
-  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
 
-  tasks     Task[]
+  tasks Task[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Task {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   title       String
   description String?
   position    Int
-  priority    Int      @default(2)
+  priority    Int     @default(2)
 
-  columnId    String
-  column      Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  columnId String
+  column   Column @relation(fields: [columnId], references: [id], onDelete: Cascade)
 
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  parentTaskId String?
+  parentTask   Task?   @relation("TaskHierarchy", fields: [parentTaskId], references: [id], onDelete: Cascade)
+  subtasks     Task[]  @relation("TaskHierarchy")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
