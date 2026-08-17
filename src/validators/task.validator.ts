@@ -8,6 +8,8 @@ export const createTaskSchema = z.object({
   columnId: z.string().uuid('Invalid column id'),
 
   priority: z.number().int().min(1, 'Priority must be at least 1').optional(),
+
+  parentTaskId: z.string().uuid('Invalid parent task id').nullable().optional(),
 });
 
 export const updateTaskSchema = z.object({
@@ -18,6 +20,8 @@ export const updateTaskSchema = z.object({
   columnId: z.string().uuid('Invalid column id').optional(),
 
   priority: z.number().int().min(1, 'Priority must be at least 1').optional(),
+
+  parentTaskId: z.string().uuid('Invalid parent task id').nullable().optional(),
 });
 
 export const reorderTaskSchema = z.object({
