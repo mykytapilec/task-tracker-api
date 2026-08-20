@@ -23,10 +23,16 @@ interface ReorderTaskInput {
 }
 
 export const taskService = {
-  async getAll(userId: string) {
+  async getAll(userId: string, boardId: string) {
     return prisma.task.findMany({
       where: {
         userId,
+        column: {
+          boardId,
+          board: {
+            userId,
+          },
+        },
       },
       orderBy: [
         {
@@ -68,16 +74,36 @@ export const taskService = {
   },
 
   async create(data: CreateTaskInput) {
+    const column = await prisma.column.findFirst({
+      where: {
+        id: data.columnId,
+        board: {
+          userId: data.userId,
+        },
+      },
+    });
+
+    if (!column) {
+      throw new Error('Column not found');
+    }
+
     if (data.parentTaskId) {
       const parentTask = await prisma.task.findFirst({
         where: {
           id: data.parentTaskId,
           userId: data.userId,
         },
+        include: {
+          column: true,
+        },
       });
 
       if (!parentTask) {
         throw new Error('Parent task not found');
+      }
+
+      if (parentTask.column.boardId !== column.boardId) {
+        throw new Error('Parent task belongs to another board');
       }
     }
 
@@ -113,6 +139,9 @@ export const taskService = {
         id,
         userId,
       },
+      include: {
+        column: true,
+      },
     });
 
     if (!task) {
@@ -129,10 +158,36 @@ export const taskService = {
           id: data.parentTaskId,
           userId,
         },
+        include: {
+          column: true,
+        },
       });
 
       if (!parentTask) {
         throw new Error('Parent task not found');
+      }
+
+      if (parentTask.column.boardId !== task.column.boardId) {
+        throw new Error('Parent task belongs to another board');
+      }
+    }
+
+    if (data.columnId) {
+      const targetColumn = await prisma.column.findFirst({
+        where: {
+          id: data.columnId,
+          board: {
+            userId,
+          },
+        },
+      });
+
+      if (!targetColumn) {
+        throw new Error('Column not found');
+      }
+
+      if (targetColumn.boardId !== task.column.boardId) {
+        throw new Error('Column belongs to another board');
       }
     }
 
@@ -164,6 +219,9 @@ export const taskService = {
         id,
         userId,
       },
+      include: {
+        column: true,
+      },
     });
 
     if (!task) {
@@ -180,6 +238,10 @@ export const taskService = {
     });
 
     if (!targetColumn) {
+      return null;
+    }
+
+    if (targetColumn.boardId !== task.column.boardId) {
       return null;
     }
 

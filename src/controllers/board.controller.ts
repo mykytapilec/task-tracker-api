@@ -6,8 +6,22 @@ import {
   createColumnSchema,
 } from '../validators/board.validator.js';
 
-export const getBoard = async (req: Request, res: Response) => {
-  const board = await boardService.getByUserId(req.user.id);
+export const getBoards = async (req: Request, res: Response) => {
+  const boards = await boardService.getAllByUserId(req.user.id);
+
+  res.json(boards);
+};
+
+export const getBoardById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!id || Array.isArray(id)) {
+    return res.status(400).json({
+      message: 'Invalid board id',
+    });
+  }
+
+  const board = await boardService.getById(id, req.user.id);
 
   if (!board) {
     return res.status(404).json({
@@ -21,14 +35,6 @@ export const getBoard = async (req: Request, res: Response) => {
 export const createBoard = async (req: Request, res: Response) => {
   try {
     const data = createBoardSchema.parse(req.body);
-
-    const existingBoard = await boardService.getByUserId(req.user.id);
-
-    if (existingBoard) {
-      return res.status(409).json({
-        message: 'Board already exists',
-      });
-    }
 
     const board = await boardService.create({
       ...data,
@@ -49,7 +55,15 @@ export const createBoard = async (req: Request, res: Response) => {
 };
 
 export const getColumns = async (req: Request, res: Response) => {
-  const columns = await boardService.getColumns(req.user.id);
+  const { boardId } = req.params;
+
+  if (!boardId || Array.isArray(boardId)) {
+    return res.status(400).json({
+      message: 'Invalid board id',
+    });
+  }
+
+  const columns = await boardService.getColumns(boardId, req.user.id);
 
   if (!columns) {
     return res.status(404).json({

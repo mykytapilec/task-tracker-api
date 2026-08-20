@@ -8,7 +8,15 @@ import {
 } from '../validators/task.validator.js';
 
 export const getTasks = async (req: Request, res: Response) => {
-  const tasks = await taskService.getAll(req.user.id);
+  const { boardId } = req.query;
+
+  if (typeof boardId !== 'string' || !boardId) {
+    return res.status(400).json({
+      message: 'Board id is required',
+    });
+  }
+
+  const tasks = await taskService.getAll(req.user.id, boardId);
 
   res.json(tasks);
 };
