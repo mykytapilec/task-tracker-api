@@ -11,9 +11,28 @@ interface CreateColumnInput {
 }
 
 export const boardService = {
-  async getByUserId(userId: string) {
-    return prisma.board.findUnique({
+  async getAllByUserId(userId: string) {
+    return prisma.board.findMany({
       where: {
+        userId,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+      include: {
+        columns: {
+          orderBy: {
+            position: 'asc',
+          },
+        },
+      },
+    });
+  },
+
+  async getById(id: string, userId: string) {
+    return prisma.board.findFirst({
+      where: {
+        id,
         userId,
       },
       include: {
@@ -35,16 +54,37 @@ export const boardService = {
             id: data.userId,
           },
         },
+        columns: {
+          create: [
+            {
+              title: 'To Do',
+              position: 0,
+            },
+            {
+              title: 'In Progress',
+              position: 1,
+            },
+            {
+              title: 'Completed',
+              position: 2,
+            },
+          ],
+        },
       },
       include: {
-        columns: true,
+        columns: {
+          orderBy: {
+            position: 'asc',
+          },
+        },
       },
     });
   },
 
-  async getColumns(userId: string) {
-    const board = await prisma.board.findUnique({
+  async getColumns(boardId: string, userId: string) {
+    const board = await prisma.board.findFirst({
       where: {
+        id: boardId,
         userId,
       },
     });
@@ -55,7 +95,7 @@ export const boardService = {
 
     return prisma.column.findMany({
       where: {
-        boardId: board.id,
+        boardId,
       },
       orderBy: {
         position: 'asc',

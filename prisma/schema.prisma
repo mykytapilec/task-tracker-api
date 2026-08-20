@@ -1,6 +1,5 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -12,8 +11,8 @@ model User {
   email        String @unique
   passwordHash String
 
-  board Board?
-  tasks Task[]
+  boards Board[]
+  tasks  Task[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -23,7 +22,7 @@ model Board {
   id    String @id @default(uuid())
   title String
 
-  userId String @unique
+  userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   columns Column[]
@@ -51,7 +50,7 @@ model Task {
   title       String
   description String?
   position    Int
-  priority    Int     @default(2)
+  priority    Int
 
   columnId String
   column   Column @relation(fields: [columnId], references: [id], onDelete: Cascade)
@@ -60,8 +59,8 @@ model Task {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   parentTaskId String?
-  parentTask   Task?   @relation("TaskHierarchy", fields: [parentTaskId], references: [id], onDelete: Cascade)
-  subtasks     Task[]  @relation("TaskHierarchy")
+  parentTask   Task?  @relation("Subtasks", fields: [parentTaskId], references: [id], onDelete: Cascade)
+  subtasks     Task[] @relation("Subtasks")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
