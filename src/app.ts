@@ -19,6 +19,6 @@ app.use(express.json());
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
-app.use('/api/board', boardRouter);
+app.use('/api/boards', boardRouter);
 
 app.use(errorMiddleware);
