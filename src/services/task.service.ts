@@ -1,10 +1,12 @@
+import { Prisma, TaskPriority } from '@prisma/client';
+
 import { prisma } from '../config/database.js';
 
 interface CreateTaskInput {
   title: string;
   description?: string;
   columnId: string;
-  priority?: number;
+  priority?: TaskPriority;
   parentTaskId?: string | null;
   userId: string;
 }
@@ -13,7 +15,7 @@ interface UpdateTaskInput {
   title?: string;
   description?: string;
   columnId?: string;
-  priority?: number;
+  priority?: TaskPriority;
   parentTaskId?: string | null;
 }
 
@@ -117,16 +119,18 @@ export const taskService = {
       },
     });
 
+    const createData: Prisma.TaskUncheckedCreateInput = {
+      title: data.title,
+      description: data.description,
+      position: lastTask ? lastTask.position + 1 : 0,
+      priority: data.priority ?? TaskPriority.medium,
+      parentTaskId: data.parentTaskId ?? null,
+      userId: data.userId,
+      columnId: data.columnId,
+    };
+
     return prisma.task.create({
-      data: {
-        title: data.title,
-        description: data.description,
-        position: lastTask ? lastTask.position + 1 : 0,
-        priority: data.priority ?? 2,
-        parentTaskId: data.parentTaskId ?? null,
-        userId: data.userId,
-        columnId: data.columnId,
-      },
+      data: createData,
       include: {
         column: true,
       },
@@ -191,21 +195,29 @@ export const taskService = {
       }
     }
 
+    const updateData: Prisma.TaskUncheckedUpdateInput = {
+      ...(data.title !== undefined && {
+        title: data.title,
+      }),
+      ...(data.description !== undefined && {
+        description: data.description,
+      }),
+      ...(data.priority !== undefined && {
+        priority: data.priority,
+      }),
+      ...(data.columnId !== undefined && {
+        columnId: data.columnId,
+      }),
+      ...(data.parentTaskId !== undefined && {
+        parentTaskId: data.parentTaskId,
+      }),
+    };
+
     return prisma.task.update({
       where: {
         id,
       },
-      data: {
-        title: data.title,
-        description: data.description,
-        priority: data.priority,
-        ...(data.columnId && {
-          columnId: data.columnId,
-        }),
-        ...(data.parentTaskId !== undefined && {
-          parentTaskId: data.parentTaskId,
-        }),
-      },
+      data: updateData,
       include: {
         column: true,
         subtasks: true,
@@ -271,7 +283,6 @@ export const taskService = {
           data: {
             columnId: data.columnId,
             position: index,
-            priority: index + 1,
           },
         }),
       ),
