@@ -12,6 +12,11 @@ enum TaskPriority {
   high
 }
 
+enum TaskStatus {
+  pending
+  completed
+}
+
 model User {
   id           String @id @default(uuid())
   email        String @unique
@@ -57,6 +62,7 @@ model Task {
   description String?
   position    Int
   priority    TaskPriority @default(medium)
+  status TaskStatus @default(pending)
 
   columnId String
   column   Column @relation(fields: [columnId], references: [id], onDelete: Cascade)
