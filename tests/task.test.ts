@@ -194,11 +194,89 @@ describe('Task endpoints', () => {
   });
 
   it('should reject unauthenticated task access', async () => {
-    const response = await request(app).get(
-      `/api/tasks/${firstTaskId}`,
-    );
+    const response = await request(app).get(`/api/tasks/${firstTaskId}`);
 
     expect(response.status).toBe(401);
     expect(response.body.message).toBe('Unauthorized');
+  });
+
+  it('should create a task with pending status by default', async () => {
+    const response = await request(app)
+      .post('/api/tasks')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Pending status task',
+        columnId,
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.status).toBe('pending');
+  });
+
+  it('should create a completed task', async () => {
+    const response = await request(app)
+      .post('/api/tasks')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Completed task',
+        columnId,
+        status: 'completed',
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.status).toBe('completed');
+  });
+
+  it('should reject an invalid task status', async () => {
+    const response = await request(app)
+      .post('/api/tasks')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Invalid status task',
+        columnId,
+        status: 'cancelled',
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe('Validation error');
+  });
+
+  it('should return pending tasks before completed tasks', async () => {
+    const completedTaskResponse = await request(app)
+      .post('/api/tasks')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Completed ordering task',
+        columnId,
+        status: 'completed',
+      });
+
+    const pendingTaskResponse = await request(app)
+      .post('/api/tasks')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Pending ordering task',
+        columnId,
+        status: 'pending',
+      });
+
+    expect(completedTaskResponse.status).toBe(201);
+    expect(pendingTaskResponse.status).toBe(201);
+
+    const response = await request(app)
+      .get(`/api/tasks?boardId=${boardId}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+
+    const tasks = response.body;
+    const completedIndex = tasks.findIndex(
+      (task: { id: string }) => task.id === completedTaskResponse.body.id,
+    );
+    const pendingIndex = tasks.findIndex(
+      (task: { id: string }) => task.id === pendingTaskResponse.body.id,
+    );
+
+    expect(pendingIndex).toBeLessThan(completedIndex);
   });
 });

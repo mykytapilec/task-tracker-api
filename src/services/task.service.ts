@@ -1,4 +1,4 @@
-import { Prisma, TaskPriority } from '@prisma/client';
+import { Prisma, TaskPriority, TaskStatus } from '@prisma/client';
 
 import { prisma } from '../config/database.js';
 
@@ -7,6 +7,7 @@ interface CreateTaskInput {
   description?: string;
   columnId: string;
   priority?: TaskPriority;
+  status?: TaskStatus;
   parentTaskId?: string | null;
   userId: string;
 }
@@ -16,6 +17,7 @@ interface UpdateTaskInput {
   description?: string;
   columnId?: string;
   priority?: TaskPriority;
+  status?: TaskStatus;
   parentTaskId?: string | null;
 }
 
@@ -39,6 +41,9 @@ export const taskService = {
       orderBy: [
         {
           columnId: 'asc',
+        },
+        {
+          status: 'asc',
         },
         {
           priority: 'asc',
@@ -124,6 +129,7 @@ export const taskService = {
       description: data.description,
       position: lastTask ? lastTask.position + 1 : 0,
       priority: data.priority ?? TaskPriority.medium,
+      status: data.status ?? TaskStatus.pending,
       parentTaskId: data.parentTaskId ?? null,
       userId: data.userId,
       columnId: data.columnId,
@@ -204,6 +210,9 @@ export const taskService = {
       }),
       ...(data.priority !== undefined && {
         priority: data.priority,
+      }),
+      ...(data.status !== undefined && {
+        status: data.status,
       }),
       ...(data.columnId !== undefined && {
         columnId: data.columnId,

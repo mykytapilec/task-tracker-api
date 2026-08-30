@@ -9,6 +9,8 @@ export const createTaskSchema = z.object({
 
   priority: z.enum(['low', 'medium', 'high']).optional(),
 
+  status: z.enum(['pending', 'completed']).optional(),
+
   parentTaskId: z.string().uuid('Invalid parent task id').nullable().optional(),
 });
 
@@ -20,6 +22,8 @@ export const updateTaskSchema = z.object({
   columnId: z.string().uuid('Invalid column id').optional(),
 
   priority: z.enum(['low', 'medium', 'high']).optional(),
+
+  status: z.enum(['pending', 'completed']).optional(),
 
   parentTaskId: z.string().uuid('Invalid parent task id').nullable().optional(),
 });
