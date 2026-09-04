@@ -8,6 +8,7 @@ interface CreateTaskInput {
   columnId: string;
   priority?: TaskPriority;
   status?: TaskStatus;
+  storyPoints?: number;
   parentTaskId?: string | null;
   userId: string;
 }
@@ -18,6 +19,7 @@ interface UpdateTaskInput {
   columnId?: string;
   priority?: TaskPriority;
   status?: TaskStatus;
+  storyPoints?: number;
   parentTaskId?: string | null;
 }
 
@@ -130,6 +132,7 @@ export const taskService = {
       position: lastTask ? lastTask.position + 1 : 0,
       priority: data.priority ?? TaskPriority.medium,
       status: data.status ?? TaskStatus.pending,
+      storyPoints: data.storyPoints ?? 1,
       parentTaskId: data.parentTaskId ?? null,
       userId: data.userId,
       columnId: data.columnId,
@@ -213,6 +216,9 @@ export const taskService = {
       }),
       ...(data.status !== undefined && {
         status: data.status,
+      }),
+      ...(data.storyPoints !== undefined && {
+        storyPoints: data.storyPoints,
       }),
       ...(data.columnId !== undefined && {
         columnId: data.columnId,

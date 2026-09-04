@@ -1,5 +1,15 @@
 import { z } from 'zod';
 
+const storyPointsSchema = z.union([
+  z.literal(1),
+  z.literal(2),
+  z.literal(3),
+  z.literal(5),
+  z.literal(8),
+  z.literal(13),
+  z.literal(21),
+]);
+
 export const createTaskSchema = z.object({
   title: z.string().trim().min(1, 'Title is required'),
 
@@ -10,6 +20,8 @@ export const createTaskSchema = z.object({
   priority: z.enum(['low', 'medium', 'high']).optional(),
 
   status: z.enum(['pending', 'completed']).optional(),
+
+  storyPoints: storyPointsSchema.optional(),
 
   parentTaskId: z.string().uuid('Invalid parent task id').nullable().optional(),
 });
@@ -24,6 +36,8 @@ export const updateTaskSchema = z.object({
   priority: z.enum(['low', 'medium', 'high']).optional(),
 
   status: z.enum(['pending', 'completed']).optional(),
+
+  storyPoints: storyPointsSchema.optional(),
 
   parentTaskId: z.string().uuid('Invalid parent task id').nullable().optional(),
 });
