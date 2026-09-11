@@ -5,12 +5,13 @@ import healthRoutes from './routes/health.routes.js';
 import taskRoutes from './routes/task.routes.js';
 import boardRouter from './routes/board.routes.js';
 import { errorMiddleware } from './middleware/error.middleware.js';
+import { env } from './config/env.js';
 
 export const app = express();
 
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: env.corsOrigin,
   }),
 );
 
