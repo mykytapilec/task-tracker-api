@@ -30,8 +30,9 @@ model User {
 }
 
 model Board {
-  id    String @id @default(uuid())
-  title String
+  id          String  @id @default(uuid())
+  title       String
+  publicToken String? @unique
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
